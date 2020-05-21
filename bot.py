@@ -13,7 +13,7 @@ from praw.exceptions import RedditAPIException
 
 
 class RedditBot():
-    def __init__(self, bot=None, logger_config='./logging_config.ini', bot_config='./bot_config.json', posts_replied_to_path='./posts_replied_to.txt'):
+    def __init__(self, bot=None, logger_config='./logging_config.ini', bot_config='./bot_config.json', posts_replied_to_path=None):
         # Create logger in accordance with config file
         fileConfig(logger_config)
         self.logger = logging.getLogger('reddit')
@@ -85,11 +85,16 @@ class RedditBot():
                 else:
                     time.sleep(2) # sleep to retry in case of errors
 
-    def get_post_replied_to(self, path='./posts_replied_to.txt'):
+    def get_post_replied_to(self, path=None):
          # Read the file into a list and remove any empty values
-        with open(path, 'r') as f:
-            posts_replied_to = list(filter(None, f.read().splitlines()))
+        if path is None:
+            f = open('./posts_replied_to.txt', 'w') if path is None else open(path, 'r')
+            self.posts_replied_to_path = './posts_replied_to.txt'
+        else:
+            f = open(path, 'r')
+        posts_replied_to = list(filter(None, f.read().splitlines()))
         self.logger.info("Got posts that were already replied")
+        f.close()
         return posts_replied_to
 
     def get_username(self, author):

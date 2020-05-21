@@ -90,9 +90,10 @@ class RedditBot():
         if path is None:
             f = open('./posts_replied_to.txt', 'w') if path is None else open(path, 'r')
             self.posts_replied_to_path = './posts_replied_to.txt'
+            posts_replied_to = []
         else:
             f = open(path, 'r')
-        posts_replied_to = list(filter(None, f.read().splitlines()))
+            posts_replied_to = list(filter(None, f.read().splitlines()))
         self.logger.info("Got posts that were already replied")
         f.close()
         return posts_replied_to

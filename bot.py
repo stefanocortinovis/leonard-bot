@@ -1,4 +1,5 @@
 import json
+import os
 import random
 import re
 import time
@@ -10,14 +11,22 @@ import praw
 from prawcore.exceptions import PrawcoreException
 from praw.exceptions import RedditAPIException
 
+
 class RedditBot():
-    def __init__(self, bot='bot1', logger_config='./logging_config.ini', bot_config='./bot_config.json', posts_replied_to_path='./posts_replied_to.txt'):
+    def __init__(self, bot=None, logger_config='./logging_config.ini', bot_config='./bot_config.json', posts_replied_to_path='./posts_replied_to.txt'):
         # Create logger in accordance with config file
         fileConfig(logger_config)
         self.logger = logging.getLogger('reddit')
 
         # Create Reddit instance
-        self.reddit = praw.Reddit(bot)
+        if bot is None:
+            self.reddit = praw.Reddit(username = os.environ['reddit_username'],
+                                      password = os.environ['reddit_password'],
+                                      client_id = os.environ["client_id"],
+                                      client_secret = os.environ["client_secret"],
+                                      user_agent = "scortino")
+        else:
+            self.reddit = praw.Reddit(bot)
         self.logger.info("Instantiated Reddit client")
 
         with open(bot_config, 'r') as f:

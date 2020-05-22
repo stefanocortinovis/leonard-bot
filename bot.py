@@ -62,7 +62,6 @@ class RedditBot():
 
                             # Store the current id into our list
                             self.posts_replied_to.append(comment.id)
-                            print(self.posts_replied_to)
                             self.logger.info('Appended replied posts to list')
 
                             with open(self.posts_replied_to_path, 'a') as f:

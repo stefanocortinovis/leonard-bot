@@ -38,7 +38,6 @@ class RedditBot():
         # Store posts already replied to
         self.posts_replied_to_path = posts_replied_to_path
         self.posts_replied_to = self.get_post_replied_to(posts_replied_to_path)
-        print(self.posts_replied_to)
     
     def start(self):
         while True:

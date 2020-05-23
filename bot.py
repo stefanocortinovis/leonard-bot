@@ -26,6 +26,7 @@ class RedditBot():
                                       client_secret = os.environ["client_secret"],
                                       user_agent = "scortino")
         else:
+            # requires praw.ini to be in current dir
             self.reddit = praw.Reddit(bot)
         self.logger.info("Instantiated Reddit client")
 
@@ -52,21 +53,18 @@ class RedditBot():
                     username = self.get_username(comment.author)
                     
                     # If we haven't replied to this comment before and the comment author is not blocked
-                    if comment.id not in self.posts_replied_to and username not in self.blocked_users:
-                        
-                        if self.is_keyword_mentioned(comment.body):
+                    if comment.id not in self.posts_replied_to and username not in self.blocked_users and self.is_keyword_mentioned(comment.body):
+                        # Reply to the post and write activity to the log
+                        comment.reply(random.choice(self.quotes))
+                        self.logger.info(f'Replied to comment in subreddit {comment.subreddit}')
 
-                            # Reply to the post and write activity to the log
-                            comment.reply(random.choice(self.quotes))
-                            self.logger.info(f'Replied to comment in subreddit {comment.subreddit}')
+                        # Store the current id into our list
+                        self.posts_replied_to.append(comment.id)
+                        self.logger.info('Appended replied posts to list')
 
-                            # Store the current id into our list
-                            self.posts_replied_to.append(comment.id)
-                            self.logger.info('Appended replied posts to list')
-
-                            with open(self.posts_replied_to_path, 'a') as f:
-                                f.write(comment.id + '\n')
-                            self.logger.info(f'Written to {self.posts_replied_to_path} file, ID {comment.id}')
+                        with open(self.posts_replied_to_path, 'a') as f:
+                            f.write(comment.id + '\n')
+                        self.logger.info(f'Written to {self.posts_replied_to_path} file, ID {comment.id}')
 
             except KeyboardInterrupt:
                 self.logger.error('Keyboard termination received. Bye!')

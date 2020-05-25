@@ -1,10 +1,11 @@
 {
     "blocked_users": [
-        "GoodBot_BadBot", 
         "B0tRank",
+        "GoodBot_BadBot", 
+        "leonard-bot",
         "MMBbot",
-        "shut-up-leonard-bot",
-        "leonard-bot"
+        "nice-scores",
+        "shut-up-leonard-bot"
     ],
 
     "subs": [
@@ -12,9 +13,9 @@
     ],
 
     "triggers": [
-        "leonard",
         "bucket of guts",
-        "human raisin"
+        "human raisin",
+        "leonard"
     ],
 
     "quotes": [

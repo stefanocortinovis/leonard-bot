@@ -69,8 +69,11 @@ class RedditBot():
             except KeyboardInterrupt:
                 self.logger.error('Keyboard termination received. Bye!')
                 break
-            except (PrawcoreException, RedditAPIException) as e:
-                self.logger.exception(f'PRAW Exception received: {vars(e)}. Retrying...')
+            except PrawcoreException as e:
+                self.logger.exception(f'Prawcore Exception received: {vars(e)}. Retrying...')
+                time.sleep(2) # sleep to retry in case of errors
+            except RedditAPIException as e:
+                self.logger.exception(f'Praw Exception received: {vars(e)}. Retrying...')
                 if e.items[0].error_type == 'RATELIMIT':
                     search = re.search('minutes', str(e))
                     try:
@@ -78,8 +81,6 @@ class RedditBot():
                         time.sleep(seconds)
                     except:
                         time.sleep(60)
-                else:
-                    time.sleep(2) # sleep to retry in case of errors
 
     def get_post_replied_to(self, path=None):
          # Read the file into a list and remove any empty values

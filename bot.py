@@ -24,7 +24,7 @@ class RedditBot():
                                       password = os.environ['reddit_password'],
                                       client_id = os.environ["client_id"],
                                       client_secret = os.environ["client_secret"],
-                                      user_agent = "scortino")
+                                      user_agent = os.environ["user_agent"])
         else:
             # requires praw.ini to be in current dir
             self.reddit = praw.Reddit(bot)
@@ -35,10 +35,6 @@ class RedditBot():
             self.blocked_users, self.subreddits, self.triggers, self.quotes = json.load(f).values()
 
         self.subreddits = '+'.join(self.subreddits)
-
-        # Store posts already replied to
-        self.posts_replied_to_path = posts_replied_to_path
-        self.posts_replied_to = self.get_post_replied_to(posts_replied_to_path)
     
     def start(self):
         while True:
@@ -47,24 +43,16 @@ class RedditBot():
                 subreddit = self.reddit.subreddit(self.subreddits)
 
                 # Iterate over comments
-                for comment in subreddit.stream.comments():
+                for comment in subreddit.stream.comments(skip_existing=True):
 
                     # Check if author name exists or not
                     username = self.get_username(comment.author)
                     
-                    # If we haven't replied to this comment before and the comment author is not blocked
-                    if comment.id not in self.posts_replied_to and username not in self.blocked_users and self.is_keyword_mentioned(comment.body):
+                    # Reply only if keyword mentioned and author is not blocked
+                    if self.is_keyword_mentioned(comment.body) and username not in self.blocked_users:
                         # Reply to the post and write activity to the log
                         comment.reply(random.choice(self.quotes))
-                        self.logger.info(f'Replied to comment in subreddit {comment.subreddit}')
-
-                        # Store the current id into our list
-                        self.posts_replied_to.append(comment.id)
-                        self.logger.info('Appended replied posts to list')
-
-                        with open(self.posts_replied_to_path, 'a') as f:
-                            f.write(comment.id + '\n')
-                        self.logger.info(f'Written to {self.posts_replied_to_path} file, ID {comment.id}')
+                        self.logger.info(f'Replied to comment in subreddit {comment.subreddit}, ID {comment.id}')
 
             except KeyboardInterrupt:
                 self.logger.error('Keyboard termination received. Bye!')
@@ -81,19 +69,6 @@ class RedditBot():
                         time.sleep(seconds)
                     except:
                         time.sleep(60)
-
-    def get_post_replied_to(self, path=None):
-         # Read the file into a list and remove any empty values
-        if path is None:
-            f = open('./posts_replied_to.txt', 'w') if path is None else open(path, 'r')
-            self.posts_replied_to_path = './posts_replied_to.txt'
-            posts_replied_to = []
-        else:
-            f = open(path, 'r')
-            posts_replied_to = list(filter(None, f.read().splitlines()))
-        self.logger.info("Got posts that were already replied")
-        f.close()
-        return posts_replied_to
 
     def get_username(self, author):
         name = author.name if author else '[deleted]'
